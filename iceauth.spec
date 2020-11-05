@@ -4,14 +4,15 @@
 #
 Name     : iceauth
 Version  : 1.0.8
-Release  : 13
+Release  : 14
 URL      : http://xorg.freedesktop.org/releases/individual/app/iceauth-1.0.8.tar.gz
 Source0  : http://xorg.freedesktop.org/releases/individual/app/iceauth-1.0.8.tar.gz
 Summary  : No detailed summary available
 Group    : Development/Tools
 License  : MIT-Opengroup
-Requires: iceauth-bin
-Requires: iceauth-doc
+Requires: iceauth-bin = %{version}-%{release}
+Requires: iceauth-license = %{version}-%{release}
+Requires: iceauth-man = %{version}-%{release}
 BuildRequires : pkgconfig(ice)
 BuildRequires : pkgconfig(xorg-macros)
 BuildRequires : pkgconfig(xproto)
@@ -24,41 +25,58 @@ like the xauth program for X11 connection authentication records.
 %package bin
 Summary: bin components for the iceauth package.
 Group: Binaries
+Requires: iceauth-license = %{version}-%{release}
 
 %description bin
 bin components for the iceauth package.
 
 
-%package doc
-Summary: doc components for the iceauth package.
-Group: Documentation
+%package license
+Summary: license components for the iceauth package.
+Group: Default
 
-%description doc
-doc components for the iceauth package.
+%description license
+license components for the iceauth package.
+
+
+%package man
+Summary: man components for the iceauth package.
+Group: Default
+
+%description man
+man components for the iceauth package.
 
 
 %prep
 %setup -q -n iceauth-1.0.8
+cd %{_builddir}/iceauth-1.0.8
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-export LANG=C
-export SOURCE_DATE_EPOCH=1521136680
+export LANG=C.UTF-8
+export SOURCE_DATE_EPOCH=1604616016
+export GCC_IGNORE_WERROR=1
+export CFLAGS="$CFLAGS -fno-lto "
+export FCFLAGS="$FFLAGS -fno-lto "
+export FFLAGS="$FFLAGS -fno-lto "
+export CXXFLAGS="$CXXFLAGS -fno-lto "
 %configure --disable-static
 make  %{?_smp_mflags}
 
 %check
-export LANG=C
+export LANG=C.UTF-8
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-make VERBOSE=1 V=1 %{?_smp_mflags} check
+make %{?_smp_mflags} check
 
 %install
-export SOURCE_DATE_EPOCH=1521136680
+export SOURCE_DATE_EPOCH=1604616016
 rm -rf %{buildroot}
+mkdir -p %{buildroot}/usr/share/package-licenses/iceauth
+cp %{_builddir}/iceauth-1.0.8/COPYING %{buildroot}/usr/share/package-licenses/iceauth/5d1a41800996f1c023b69f4b1c3a93b194a66e80
 %make_install
 
 %files
@@ -68,6 +86,10 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 /usr/bin/iceauth
 
-%files doc
-%defattr(-,root,root,-)
-%doc /usr/share/man/man1/*
+%files license
+%defattr(0644,root,root,0755)
+/usr/share/package-licenses/iceauth/5d1a41800996f1c023b69f4b1c3a93b194a66e80
+
+%files man
+%defattr(0644,root,root,0755)
+/usr/share/man/man1/iceauth.1
